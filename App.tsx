@@ -1,26 +1,30 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-
-// Pages
 import LoginPage from './pages/LoginPage';
 import DashboardHome from './pages/DashboardHome';
-import TournamentCreation from './pages/TournamentCreation';
-
-// Components
 import DashboardLayout from './components/DashboardLayout';
 
-// Context
-import { useAuth } from './context/AuthContext'; // ✅ This line was missing
-import TestAuthPage from './pages/TestAuthPage';
+// Import fallback-ready auth
+import { onAuthStateChanged } from './utils/authSwitcher';
 
 function App() {
-  const { currentUser } = useAuth(); // ✅ Now recognized
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
-   return (
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged((user) => {
+      setCurrentUser(user);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  return (
     <Router>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-          <Route
+        <Route
           path="/"
           element={
             <PrivateRoute currentUser={currentUser}>
@@ -30,18 +34,10 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route path="/create-tournament"
-        
-          element={
-            <DashboardLayout>
-              <TournamentCreation />
-            </DashboardLayout>
-          }
-        />
-              </Routes>
-            </Router>
-          );
-        };
+      </Routes>
+    </Router>
+  );
+}
 
 // Simple private route wrapper
 const PrivateRoute: React.FC<{ currentUser: any; children: React.ReactNode }> = ({ currentUser, children }) => {

@@ -1,10 +1,20 @@
 import React from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
+
+  if (!currentUser) {
+    navigate('/login');
+    return null;
+  }
+
   return (
     <div className="flex h-screen flex-col md:flex-row md:overflow-hidden bg-sports-blue-35 font-sans">
       {/* Sidebar */}
@@ -17,6 +27,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <a href="/calendar" className="hover:text-sports-red transition duration-200">Calendar</a>
           <a href="/referees" className="hover:text-sports-red transition duration-200">Referees</a>
           <a href="/settings" className="hover:text-sports-red transition duration-200">Settings</a>
+          <a href="/create-tournament" className="hover:text-sports-red transition duration-200">Create Tournament</a>
         </nav>
       </div>
 
@@ -26,8 +37,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         <header className="bg-white shadow-sm p-4 flex justify-between items-center border-b border-sports-black-35">
           <h2 className="text-lg font-semibold text-sports-black">Dashboard</h2>
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-sports-black">Welcome, David</span>
-            <button className="text-sm px-3 py-1 bg-sports-red text-white rounded hover:bg-sports-red transition">Logout</button>
+            <span className="text-sm text-sports-black">Welcome, {currentUser?.email}</span>
+            <button
+              onClick={() => auth.signOut()}
+              className="text-sm px-3 py-1 bg-sports-red text-white rounded hover:bg-sports-red transition"
+            >
+              Logout
+            </button>
           </div>
         </header>
 

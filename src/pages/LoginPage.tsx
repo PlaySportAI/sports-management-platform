@@ -1,12 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { auth } from '../utils/authSwitcher';
+import { useNavigate } from 'react-router-dom';
 
 const LoginPage: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await auth.signInWithEmailAndPassword(email, password);
+      navigate('/');
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-sports-blue-35 flex items-center justify-center px-4">
       <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full">
-        <h2 className="text-2xl font-bold text-center text-sports-blue mb-6">Sign In</h2>
-        
-        <form className="space-y-6">
+        <h2 className="text-2xl font-bold text-center text-sports-blue mb-6">PlaySportAI Sign In</h2>
+
+        {error && <div className="bg-red-100 text-red-700 p-3 mb-4 rounded">{error}</div>}
+
+        <form onSubmit={handleLogin} className="space-y-6">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-sports-black mb-1">Email address</label>
             <input
@@ -15,6 +34,7 @@ const LoginPage: React.FC = () => {
               type="email"
               autoComplete="email"
               required
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sports-blue"
               placeholder="you@example.com"
             />
@@ -28,27 +48,10 @@ const LoginPage: React.FC = () => {
               type="password"
               autoComplete="current-password"
               required
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sports-blue"
               placeholder="••••••••"
             />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-sports-blue focus:ring-sports-blue border-gray-300 rounded accent-sports-blue"
-              />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-sports-black">Remember me</label>
-            </div>
-
-            <div className="text-sm">
-              <a href="/forgot-password" className="font-medium text-sports-blue hover:text-sports-red">
-                Forgot your password?
-              </a>
-            </div>
           </div>
 
           <button
