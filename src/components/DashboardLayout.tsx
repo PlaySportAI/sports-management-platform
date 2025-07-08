@@ -28,6 +28,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <a href="/referees" className="hover:text-sports-red transition duration-200">Referees</a>
           <a href="/settings" className="hover:text-sports-red transition duration-200">Settings</a>
           <a href="/create-tournament" className="hover:text-sports-red transition duration-200">Create Tournament</a>
+          <a href="/team-management" className="hover:text-sports-red transition duration-200">Team Management</a>
         </nav>
       </div>
 

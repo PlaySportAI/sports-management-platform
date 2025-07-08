@@ -1,26 +1,27 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 // Pages
 import LoginPage from './pages/LoginPage';
 import DashboardHome from './pages/DashboardHome';
 import TournamentCreation from './pages/TournamentCreation';
+import TeamManagement from './pages/TeamManagement';
 
 // Components
 import DashboardLayout from './components/DashboardLayout';
 
-// Context
-import { useAuth } from './context/AuthContext'; // ✅ This line was missing
-import TestAuthPage from './pages/TestAuthPage';
+// Auth
+import { useAuth } from './context/AuthContext';
 
 function App() {
-  const { currentUser } = useAuth(); // ✅ Now recognized
+  const { currentUser } = useAuth();
 
-   return (
+  return (
     <Router>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-          <Route
+
+        <Route
           path="/"
           element={
             <PrivateRoute currentUser={currentUser}>
@@ -30,20 +31,34 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route path="/create-tournament"
-        
+
+        <Route
+          path="/create-tournament"
           element={
-            <DashboardLayout>
-              <TournamentCreation />
-            </DashboardLayout>
+            <PrivateRoute currentUser={currentUser}>
+              <DashboardLayout>
+                <TournamentCreation />
+              </DashboardLayout>
+            </PrivateRoute>
           }
         />
-              </Routes>
-            </Router>
-          );
-        };
 
-// Simple private route wrapper
+        <Route
+          path="/team-management"
+          element={
+            <PrivateRoute currentUser={currentUser}>
+              <DashboardLayout>
+                <TeamManagement />
+              </DashboardLayout>
+            </PrivateRoute>
+          }
+        />
+      </Routes>
+    </Router>
+  );
+}
+
+// Private route wrapper
 const PrivateRoute: React.FC<{ currentUser: any; children: React.ReactNode }> = ({ currentUser, children }) => {
   if (!currentUser) {
     return <Navigate to="/login" />;

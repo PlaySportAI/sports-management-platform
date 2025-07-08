@@ -1,10 +1,6 @@
-import { useState } from 'react';
-
-// Mock user data
 let currentUser = {
   email: 'test@example.com',
-  uid: 'local-user-123',
-  token: 'mock-jwt-token'
+  uid: 'local-user-123'
 };
 
 export const signInWithEmail = (email: string, password: string): Promise<any> => {
@@ -12,7 +8,7 @@ export const signInWithEmail = (email: string, password: string): Promise<any> =
     if (email === 'test@example.com' && password === 'password123') {
       resolve(currentUser);
     } else {
-      reject(new Error('Invalid email or password'));
+      reject(new Error('Invalid credentials'));
     }
   });
 };
@@ -21,6 +17,10 @@ export const signOut = () => {
   currentUser = null;
 };
 
+// Return a dummy unsubscribe function
 export const onAuthStateChanged = (callback: (user: any) => void) => {
   callback(currentUser);
+
+  // Simulate Firebase's unsubscribe behavior
+  return () => {};
 };

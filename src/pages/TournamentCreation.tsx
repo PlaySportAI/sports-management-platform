@@ -1,15 +1,36 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { createTournament } from '../lib/api';
 
 const TournamentCreation: React.FC = () => {
   const [step, setStep] = useState(1);
-  useEffect(() => {
-  setStep(1);
-}, []);
+
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
-  const getStepClass = (stepNum: number) => {
-    return step >= stepNum ? 'text-sports-blue text-sm' : 'text-sports-black opacity-50 text-sm';
+  const [tournamentData, setTournamentData] = useState({
+    name: '',
+    sport: '',
+    teams: 0,
+    format: '',
+    organizer: ''
+  });
+
+  const navigate = useNavigate();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setTournamentData({ ...tournamentData, [name]: value });
+  };
+
+  const handleCreateTournament = async () => {
+    try {
+      const createdTournament = await createTournament(tournamentData);
+      console.log("Tournament created:", createdTournament);
+      navigate('/');
+    } catch (err: any) {
+      alert("Error creating tournament: " + err.message);
+    }
   };
 
   const renderStep = () => {
@@ -51,15 +72,21 @@ const TournamentCreation: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-sports-black mb-1">Tournament Name</label>
                 <input
+                  name="name"
                   type="text"
                   placeholder="e.g., Shanghai Tens 2025"
+                  onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sports-blue"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-sports-black mb-1">Sport Type</label>
-                <select className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sports-blue">
+                <select
+                  name="sport"
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sports-blue"
+                >
                   <option value="">Select Sport</option>
                   <option value="rugby">Rugby</option>
                   <option value="soccer">Soccer</option>
@@ -69,7 +96,11 @@ const TournamentCreation: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-sports-black mb-1">Number of Teams</label>
-                <select className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sports-blue">
+                <select
+                  name="teams"
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sports-blue"
+                >
                   <option value="">Select Team Count</option>
                   <option value="4">4 Teams</option>
                   <option value="8">8 Teams</option>
@@ -79,7 +110,11 @@ const TournamentCreation: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-sports-black mb-1">Tournament Format</label>
-                <select className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sports-blue">
+                <select
+                  name="format"
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sports-blue"
+                >
                   <option value="">Select Format</option>
                   <option value="round-robin">Round Robin</option>
                   <option value="knockout">Knockout</option>
@@ -90,35 +125,25 @@ const TournamentCreation: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-sports-black mb-1">Organizer Information</label>
                 <input
+                  name="organizer"
                   type="text"
                   placeholder="Your name"
+                  onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sports-blue"
                 />
                 <input
                   type="email"
                   placeholder="Email"
-                  className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sports-blue"
-                />
-                <input
-                  type="tel"
-                  placeholder="Phone Number (optional)"
-                  className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sports-blue"
+                  disabled
+                  className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
                 />
               </div>
 
               <div className="flex justify-between mt-6">
-                <button
-                  type="button"
-                  onClick={prevStep}
-                  className="bg-sports-red hover:bg-red-700 text-white py-2 px-4 rounded-md transition duration-200"
-                >
+                <button type="button" onClick={prevStep} className="bg-sports-red hover:bg-red-700 text-white py-2 px-4 rounded-md transition duration-200">
                   Back
                 </button>
-                <button
-                  type="button"
-                  onClick={nextStep}
-                  className="bg-sports-blue hover:bg-sports-red text-white py-2 px-4 rounded-md transition duration-200"
-                >
+                <button type="button" onClick={nextStep} className="bg-sports-blue hover:bg-sports-red text-white py-2 px-4 rounded-md transition duration-200">
                   Next
                 </button>
               </div>
@@ -163,18 +188,10 @@ const TournamentCreation: React.FC = () => {
               </div>
 
               <div className="flex justify-between mt-6">
-                <button
-                  type="button"
-                  onClick={prevStep}
-                  className="bg-sports-red hover:bg-red-700 text-white py-2 px-4 rounded-md transition duration-200"
-                >
+                <button type="button" onClick={prevStep} className="bg-sports-red hover:bg-red-700 text-white py-2 px-4 rounded-md transition duration-200">
                   Back
                 </button>
-                <button
-                  type="button"
-                  onClick={nextStep}
-                  className="bg-sports-blue hover:bg-sports-red text-white py-2 px-4 rounded-md transition duration-200"
-                >
+                <button type="button" onClick={nextStep} className="bg-sports-blue hover:bg-sports-red text-white py-2 px-4 rounded-md transition duration-200">
                   Next
                 </button>
               </div>
@@ -223,15 +240,12 @@ const TournamentCreation: React.FC = () => {
               </div>
 
               <div className="flex justify-between mt-6">
-                <button
-                  type="button"
-                  onClick={prevStep}
-                  className="bg-sports-red hover:bg-red-700 text-white py-2 px-4 rounded-md transition duration-200"
-                >
+                <button type="button" onClick={prevStep} className="bg-sports-red hover:bg-red-700 text-white py-2 px-4 rounded-md transition duration-200">
                   Back
                 </button>
                 <button
-                  type="submit"
+                  type="button"
+                  onClick={handleCreateTournament}
                   className="bg-sports-blue hover:bg-sports-red text-white py-2 px-6 rounded-md transition duration-200"
                 >
                   Create Tournament
@@ -250,10 +264,10 @@ const TournamentCreation: React.FC = () => {
       <div className="bg-white p-8 rounded-xl shadow-lg max-w-2xl w-full">
         <div className="mb-6">
           <div className="flex justify-between items-center mb-4">
-            <div className={getStepClass(1)}>Setup Mode</div>
-            <div className={getStepClass(2)}>Basic Info</div>
-            <div className={getStepClass(3)}>Seeding</div>
-            <div className={getStepClass(4)}>Optional Details</div>
+            <div className="text-sm text-sports-black">Setup Mode</div>
+            <div className="text-sm text-sports-black">Basic Info</div>
+            <div className="text-sm text-sports-black">Seeding</div>
+            <div className="text-sm text-sports-black">Optional Details</div>
           </div>
           <div className="w-full bg-gray-200 h-1 mb-6">
             <div
