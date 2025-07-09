@@ -5,58 +5,89 @@ interface Event {
   name: string;
   sport: string;
   date: string;
+  ageGroup: string;
   location: {
     region: string;
     city: string;
-    district: string;
+    district?: string;
   };
-  ageGroup: string;
 }
 
+// Mock events data
 const mockEvents: Event[] = [
   {
     id: 1,
-    name: 'Shanghai Tens 2025',
-    sport: 'Rugby',
-    ageGroup: 'U18',
+    name: "Shanghai Tens",
+    sport: "Rugby",
+    ageGroup: "U18",
     location: {
-      region: 'East China',
-      city: 'Shanghai',
-      district: 'Pudong'
+      region: "East China",
+      city: "Shanghai",
+      district: "Pudong"
     },
-    date: '2025-07-10'
+    date: "2025-07-10"
   },
   {
     id: 2,
-    name: 'Beijing Darts Cup',
-    sport: 'Darts',
-    ageGroup: 'Open',
+    name: "Beijing Darts Cup",
+    sport: "Darts",
+    ageGroup: "Open",
     location: {
-      region: 'North China',
-      city: 'Beijing',
-      district: ''
+      region: "North China",
+      city: "Beijing",
+      district: ""
     },
-    date: '2025-07-12'
+    date: "2025-07-12"
+  },
+  {
+    id: 3,
+    name: "Hangzhou U18 Soccer",
+    sport: "Soccer",
+    ageGroup: "U18",
+    location: {
+      region: "East China",
+      city: "Hangzhou",
+      district: "Xihu"
+    },
+    date: "2025-07-15"
   }
 ];
 
 const CalendarPage: React.FC = () => {
+  const today = new Date();
+  const currentMonth = today.toLocaleString('default', { month: 'long' });
+  const currentYear = today.getFullYear();
+
+  // Filters
   const [sportFilter, setSportFilter] = useState<string>('');
   const [ageGroupFilter, setAgeGroupFilter] = useState<string>('');
   const [regionFilter, setRegionFilter] = useState<string>('');
   const [cityFilter, setCityFilter] = useState<string>('');
   const [districtFilter, setDistrictFilter] = useState<string>('');
 
-  // Apply filters
+  // Filter events based on selected values
   const filteredEvents = mockEvents.filter(event => {
     return (
       (!sportFilter || event.sport === sportFilter) &&
       (!ageGroupFilter || event.ageGroup === ageGroupFilter) &&
       (!regionFilter || event.location.region.includes(regionFilter)) &&
       (!cityFilter || event.location.city.includes(cityFilter)) &&
-      (!districtFilter || event.location.district.includes(districtFilter))
+      (!districtFilter || (event.location.district && event.location.district.includes(districtFilter)))
     );
   });
+
+  // Group events by date
+  const eventsByDate: Record<string, Event[]> = {};
+  filteredEvents.forEach(event => {
+    const day = event.date.split('-')[2];
+    if (!eventsByDate[day]) {
+      eventsByDate[day] = [];
+    }
+    eventsByDate[day].push(event);
+  });
+
+  // Generate empty slots before first day of month
+  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
 
   return (
     <div className="min-h-screen bg-sports-blue-35 p-6">
@@ -107,7 +138,7 @@ const CalendarPage: React.FC = () => {
             <option value="">All Cities</option>
             <option value="Shanghai">Shanghai</option>
             <option value="Beijing">Beijing</option>
-            <option value="Guangzhou">Guangzhou</option>
+            <option value="Hangzhou">Hangzhou</option>
           </select>
 
           <select
@@ -129,29 +160,56 @@ const CalendarPage: React.FC = () => {
               setCityFilter('');
               setDistrictFilter('');
             }}
-            className="bg-sports-red hover:bg-red-700 text-white px-4 py-2 rounded-md transition duration-200"
+            className="bg-sports-red hover:bg-red-700 text-white px-4 py-2 rounded transition duration-200"
           >
             Clear Filters
           </button>
         </div>
 
-        {/* Event List */}
-        <div className="space-y-4">
-          {filteredEvents.length === 0 && (
-            <p className="text-sports-black">No events match your filters.</p>
-          )}
+        {/* Calendar Header */}
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-sports-black">{currentMonth} {currentYear}</h2>
+          <div className="space-x-2">
+            <button className="px-3 py-1 bg-sports-blue text-white rounded hover:bg-sports-red transition">
+              Previous
+            </button>
+            <button className="px-3 py-1 bg-sports-blue text-white rounded hover:bg-sports-red transition">
+              Next
+            </button>
+          </div>
+        </div>
 
-          {filteredEvents.map(event => (
-            <div key={event.id} className="border border-sports-blue-35 p-4 rounded-md hover:bg-sports-blue-35 transition">
-              <h3 className="font-semibold text-sports-black">{event.name}</h3>
-              <p className="text-sm text-sports-black">
-                <span>Sport: {event.sport}</span> •{' '}
-                <span>Age Group: {event.ageGroup}</span> •{' '}
-                <span>{event.location.region}, {event.location.city}, {event.location.district}</span> •{' '}
-                <span>Date: {event.date}</span>
-              </p>
-            </div>
+        {/* Calendar Grid */}
+        <div className="grid grid-cols-7 gap-2 text-center">
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+            <div key={day} className="font-medium text-sports-black">{day}</div>
           ))}
+
+          {/* Empty slots before 1st */}
+          {Array.from({ length: firstDayOfMonth }).map((_, i) => (
+            <div key={i}></div>
+          ))}
+
+          {/* Render all days */}
+          {Array.from({ length: new Date(currentYear, today.getMonth() + 1, 0).getDate() }).map((_, i) => {
+            const day = i + 1;
+            const hasEvent = eventsByDate[day.toString()]?.length > 0;
+
+            return (
+              <div key={day} className="border border-gray-200 p-2 min-h-24">
+                <div className={hasEvent ? 'text-sports-blue font-semibold' : ''}>{day}</div>
+                {hasEvent && (
+                  <ul className="mt-1 space-y-1">
+                    {eventsByDate[day.toString()].map(event => (
+                      <li key={event.id} className="text-xs bg-sports-blue-35 text-sports-black px-2 py-1 rounded">
+                        {event.name}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
