@@ -1,61 +1,62 @@
-// Temporary API layer – replace with real backend later
+import { v4 as uuidv4 } from 'uuid';
 
-export const loginUser = async (email: string, password: string): Promise<{ user: any }> => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (email === 'test@example.com' && password === 'password123') {
-        resolve({
-          user: {
-            email,
-            token: 'mock-jwt-token',
-            role: 'organizer'
-          }
-        });
-      } else {
-        reject(new Error('Invalid credentials'));
-      }
-    }, 500);
+// Define models
+export interface Tournament {
+  id: string;
+  name: string;
+  sport: string;
+  date: string;
+  location: string;
+  organizer: string;
+  teamsRegistered: string[];
+  status: 'upcoming' | 'in-progress' | 'completed';
+}
+
+// Mock tournaments
+let mockTournaments = [
+  {
+    id: uuidv4(),
+    name: "Shanghai Tens",
+    sport: "Rugby",
+    date: "2025-07-10",
+    location: "Pudong Stadium",
+    organizer: "coach-001",
+    teamsRegistered: [],
+    status: "upcoming" as const
+  },
+  {
+    id: uuidv4(),
+    name: "Beijing Darts Cup",
+    sport: "Darts",
+    date: "2025-07-12",
+    location: "Beijing Arena",
+    organizer: "coach-002",
+    teamsRegistered: [],
+    status: "upcoming" as const
+  }
+];
+
+// Get all tournaments
+export const getTournaments = async (): Promise<Tournament[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve([...mockTournaments]), 300);
   });
 };
 
-export const createTournament = async (data: any): Promise<any> => {
-  // Simulate saving to backend
-  console.log("Creating tournament:", data);
+// Create tournament
+export const createTournament = async (
+  data: Omit<Tournament, 'id' | 'teamsRegistered' | 'status'>
+): Promise<Tournament> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
 
-  // Return a fake response
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        ...data,
-        id: Math.floor(Math.random() * 1000),
-        createdAt: new Date().toISOString()
-      });
-    }, 500);
-  });
-};
+  const newTournament: Tournament = {
+    id: uuidv4(),
+    ...data,
+    teamsRegistered: [],
+    status: 'upcoming'
+  };
 
-export const getTournaments = async (): Promise<any[]> => {
-  // Simulate fetching from backend
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([
-        {
-          id: 1,
-          name: 'Shanghai Tens 2025',
-          sport: 'Rugby',
-          teams: 8,
-          format: 'Round Robin',
-          status: 'New'
-        },
-        {
-          id: 2,
-          name: 'Beijing Darts Cup',
-          sport: 'Darts',
-          teams: 4,
-          format: 'Knockout',
-          status: 'Underway'
-        }
-      ]);
-    }, 500);
-  });
+  mockTournaments.push(newTournament);
+
+  return newTournament;
 };

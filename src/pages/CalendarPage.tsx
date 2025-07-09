@@ -1,57 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { getTournaments } from '../lib/api';
 
 interface Event {
-  id: number;
+  id: string;
   name: string;
   sport: string;
   date: string;
-  ageGroup: string;
-  location: {
-    region: string;
-    city: string;
-    district?: string;
-  };
+  location: string;
+  organizer: string;
 }
-
-// Mock events data
-const mockEvents: Event[] = [
-  {
-    id: 1,
-    name: "Shanghai Tens",
-    sport: "Rugby",
-    ageGroup: "U18",
-    location: {
-      region: "East China",
-      city: "Shanghai",
-      district: "Pudong"
-    },
-    date: "2025-07-10"
-  },
-  {
-    id: 2,
-    name: "Beijing Darts Cup",
-    sport: "Darts",
-    ageGroup: "Open",
-    location: {
-      region: "North China",
-      city: "Beijing",
-      district: ""
-    },
-    date: "2025-07-12"
-  },
-  {
-    id: 3,
-    name: "Hangzhou U18 Soccer",
-    sport: "Soccer",
-    ageGroup: "U18",
-    location: {
-      region: "East China",
-      city: "Hangzhou",
-      district: "Xihu"
-    },
-    date: "2025-07-15"
-  }
-];
 
 const CalendarPage: React.FC = () => {
   const today = new Date();
@@ -60,24 +17,38 @@ const CalendarPage: React.FC = () => {
 
   // Filters
   const [sportFilter, setSportFilter] = useState<string>('');
-  const [ageGroupFilter, setAgeGroupFilter] = useState<string>('');
-  const [regionFilter, setRegionFilter] = useState<string>('');
-  const [cityFilter, setCityFilter] = useState<string>('');
-  const [districtFilter, setDistrictFilter] = useState<string>('');
+  const [locationFilter, setLocationFilter] = useState<string>('');
 
-  // Filter events based on selected values
-  const filteredEvents = mockEvents.filter(event => {
+  const [events, setEvents] = useState<Event[]>([]);
+
+  // Load tournaments on mount
+  useEffect(() => {
+    const loadEvents = async () => {
+      const tournaments = await getTournaments();
+      setEvents(
+        tournaments.map(t => ({
+          id: t.id,
+          name: t.name,
+          sport: t.sport,
+          date: t.date,
+          location: t.location,
+          organizer: t.organizer
+        }))
+      );
+    };
+
+    loadEvents();
+  }, []);
+
+  // Group events by day
+  const eventsByDate: Record<string, Event[]> = {};
+  const filteredEvents = events.filter(event => {
     return (
       (!sportFilter || event.sport === sportFilter) &&
-      (!ageGroupFilter || event.ageGroup === ageGroupFilter) &&
-      (!regionFilter || event.location.region.includes(regionFilter)) &&
-      (!cityFilter || event.location.city.includes(cityFilter)) &&
-      (!districtFilter || (event.location.district && event.location.district.includes(districtFilter)))
+      (!locationFilter || event.location.includes(locationFilter))
     );
   });
 
-  // Group events by date
-  const eventsByDate: Record<string, Event[]> = {};
   filteredEvents.forEach(event => {
     const day = event.date.split('-')[2];
     if (!eventsByDate[day]) {
@@ -86,7 +57,6 @@ const CalendarPage: React.FC = () => {
     eventsByDate[day].push(event);
   });
 
-  // Generate empty slots before first day of month
   const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
 
   return (
@@ -108,57 +78,20 @@ const CalendarPage: React.FC = () => {
           </select>
 
           <select
-            value={ageGroupFilter}
-            onChange={(e) => setAgeGroupFilter(e.target.value)}
+            value={locationFilter}
+            onChange={(e) => setLocationFilter(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sports-blue"
           >
-            <option value="">All Age Groups</option>
-            <option value="U18">U18</option>
-            <option value="Adult">Adult</option>
-            <option value="Senior">Senior</option>
-            <option value="Junior">Junior</option>
-          </select>
-
-          <select
-            value={regionFilter}
-            onChange={(e) => setRegionFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sports-blue"
-          >
-            <option value="">All Regions</option>
-            <option value="East China">East China</option>
-            <option value="North China">North China</option>
-            <option value="South China">South China</option>
-          </select>
-
-          <select
-            value={cityFilter}
-            onChange={(e) => setCityFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sports-blue"
-          >
-            <option value="">All Cities</option>
+            <option value="">All Locations</option>
             <option value="Shanghai">Shanghai</option>
             <option value="Beijing">Beijing</option>
             <option value="Hangzhou">Hangzhou</option>
           </select>
 
-          <select
-            value={districtFilter}
-            onChange={(e) => setDistrictFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sports-blue"
-          >
-            <option value="">All Districts</option>
-            <option value="Pudong">Pudong</option>
-            <option value="Xuhui">Xuhui</option>
-            <option value="Chaoyang">Chaoyang</option>
-          </select>
-
           <button
             onClick={() => {
               setSportFilter('');
-              setAgeGroupFilter('');
-              setRegionFilter('');
-              setCityFilter('');
-              setDistrictFilter('');
+              setLocationFilter('');
             }}
             className="bg-sports-red hover:bg-red-700 text-white px-4 py-2 rounded transition duration-200"
           >
@@ -190,17 +123,18 @@ const CalendarPage: React.FC = () => {
             <div key={i}></div>
           ))}
 
-          {/* Render all days */}
+          {/* Render days */}
           {Array.from({ length: new Date(currentYear, today.getMonth() + 1, 0).getDate() }).map((_, i) => {
             const day = i + 1;
-            const hasEvent = eventsByDate[day.toString()]?.length > 0;
+            const dayStr = day.toString().padStart(2, '0');
+            const hasEvent = eventsByDate[dayStr]?.length > 0;
 
             return (
               <div key={day} className="border border-gray-200 p-2 min-h-24">
                 <div className={hasEvent ? 'text-sports-blue font-semibold' : ''}>{day}</div>
                 {hasEvent && (
                   <ul className="mt-1 space-y-1">
-                    {eventsByDate[day.toString()].map(event => (
+                    {eventsByDate[dayStr].map(event => (
                       <li key={event.id} className="text-xs bg-sports-blue-35 text-sports-black px-2 py-1 rounded">
                         {event.name}
                       </li>
