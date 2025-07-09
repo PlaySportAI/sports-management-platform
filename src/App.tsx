@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import DashboardHome from './pages/DashboardHome';
 import TournamentCreation from './pages/TournamentCreation';
 import TeamManagement from './pages/TeamManagement';
+import CalendarPage from './pages/CalendarPage'; // ✅ Import added
 
 // Components
 import DashboardLayout from './components/DashboardLayout';
@@ -49,6 +50,18 @@ function App() {
             <PrivateRoute currentUser={currentUser}>
               <DashboardLayout>
                 <TeamManagement />
+              </DashboardLayout>
+            </PrivateRoute>
+          }
+        />
+
+        {/* ✅ Add this new route */}
+        <Route
+          path="/calendar"
+          element={
+            <PrivateRoute currentUser={currentUser}>
+              <DashboardLayout>
+                <CalendarPage />
               </DashboardLayout>
             </PrivateRoute>
           }

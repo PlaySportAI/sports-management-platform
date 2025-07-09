@@ -34,6 +34,16 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route
+          path="/calendar"
+          element={
+            <PrivateRoute currentUser={currentUser}>
+              <DashboardLayout>
+                <CalendarPage />
+              </DashboardLayout>
+            </PrivateRoute>
+          }
+        />
       </Routes>
     </Router>
   );

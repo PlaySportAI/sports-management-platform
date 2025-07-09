@@ -12,17 +12,21 @@ const LoginPage: React.FC = () => {
     if (email === 'test@example.com' && password === 'password123') {
       navigate('/');
     } else {
-      setError('Invalid test credentials');
+      setError('Invalid email or password');
     }
   };
 
   return (
     <div className="min-h-screen bg-sports-blue-35 flex items-center justify-center px-4">
       <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full">
-        <h2 className="text-2xl font-bold text-center text-sports-black mb-6">PlaySportAI Sign In</h2>
+        {/* Logo */}
+        <div className="text-center mb-6">
+          <img src="/img/logo.png" alt="PlaySportAI Logo" className="mx-auto h-10" />
+          <h2 className="text-2xl font-bold text-sports-black mt-4">PlaySportAI Sign In</h2>
+        </div>
 
         {error && (
-          <div className="bg-red-100 text-red-700 p-3 mb-6 rounded">{error}</div>
+          <div className="bg-red-100 text-red-700 p-3 mb-4 rounded">{error}</div>
         )}
 
         <form onSubmit={handleLogin} className="space-y-6">
