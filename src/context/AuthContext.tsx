@@ -1,10 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
-
-// Define user type
-interface User {
-  email: string;
-  uid: string;
-}
+import { User, UserRole } from '../Types/users';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -21,10 +16,32 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Simulate logged-in user
+  // Simulate logged-in user with basic role
   const [currentUser] = useState<User | null>({
+    id: 'local-user-123',
     email: 'test@example.com',
-    uid: 'local-user-123'
+    displayName: 'Test User',
+    roles: [{
+      role: UserRole.VIEWER,
+      assignedAt: new Date(),
+    }],
+    permissions: [{
+      resource: 'competition',
+      actions: ['read'],
+      conditions: { scope: 'global' }
+    }],
+    profile: {
+      notifications: {
+        email: true,
+        push: true,
+        types: {
+          matchUpdates: true,
+          teamAnnouncements: true,
+          competitionAnnouncements: true,
+          scheduleChanges: true
+        }
+      }
+    }
   });
 
   return (
